@@ -1,5 +1,6 @@
 #include "dijkstra.h"
 #include <stdlib.h>
+#include <math.h>
 
 /**
  * construire_chemin_vers - Construit le chemin depuis le noeud de départ donné vers le
@@ -25,7 +26,30 @@ float dijkstra(
     const struct graphe_t* graphe, 
     noeud_id_t source, noeud_id_t destination, 
     liste_noeud_t** chemin) {
-    // TODO
+
+    liste_noeud_t* aVisiter = creer_liste();
+    liste_noeud_t* Visites = creer_liste();
+
+    inserer_noeud_liste(aVisiter, source, source, 0);
+    while (!est_vide_liste(aVisiter)) {
+        noeud_id_t nc = min_noeud_liste(aVisiter);
+        inserer_noeud_liste(Visites, nc, precedent_noeud_liste(aVisiter, nc), distance_noeud_liste(aVisiter, nc));
+        supprimer_noeud_liste(aVisiter, nc);
+
+        size_t nb_voisins = nombre_voisins(graphe, nc);
+        noeud_id_t voisins[nb_voisins];
+        noeuds_voisins(graphe, nc, voisins);
+        for (size_t i =0; i < nb_voisins; i++ ) {
+            noeud_id_t nv = voisins[i];
+            double d_actu = distance_noeud_liste(Visites, nc) + noeud_distance(graphe, nc, nv);
+
+            if (distance_noeud_liste(aVisiter, nv) > d_actu) {
+                changer_noeud_liste(aVisiter, nv, nc, d_actu);
+            }
+        }
+    }
+
+    return 3.0f;
 }
 
 
