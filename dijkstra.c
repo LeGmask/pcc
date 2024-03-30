@@ -19,7 +19,13 @@
  * @param visites [in] liste des noeuds visités créée par l'algorithme de Dijkstra
  * @param noeud noeud vers lequel on veut construire le chemin depuis le départ
  */
-// TODO: construire_chemin_vers
+void construire_chemin_vers(liste_noeud_t** chemin, liste_noeud_t* visites, noeud_id_t noeud) {
+    noeud_id_t np = precedent_noeud_liste(visites, noeud);
+    if (np != NO_ID) {
+        construire_chemin_vers(chemin, visites, np);
+        inserer_noeud_liste( *chemin, np, precedent_noeud_liste(visites, np), distance_noeud_liste(visites, np));
+    }
+}
 
 
 float dijkstra(
@@ -28,28 +34,47 @@ float dijkstra(
     liste_noeud_t** chemin) {
 
     liste_noeud_t* aVisiter = creer_liste();
-    liste_noeud_t* Visites = creer_liste();
+    liste_noeud_t* visites = creer_liste();
 
-    inserer_noeud_liste(aVisiter, source, source, 0);
+    inserer_noeud_liste(aVisiter, source, NO_ID, 0);
     while (!est_vide_liste(aVisiter)) {
         noeud_id_t nc = min_noeud_liste(aVisiter);
-        inserer_noeud_liste(Visites, nc, precedent_noeud_liste(aVisiter, nc), distance_noeud_liste(aVisiter, nc));
+        inserer_noeud_liste(visites, nc, precedent_noeud_liste(aVisiter, nc), distance_noeud_liste(aVisiter, nc));
         supprimer_noeud_liste(aVisiter, nc);
 
         size_t nb_voisins = nombre_voisins(graphe, nc);
-        noeud_id_t voisins[nb_voisins];
+        noeud_id_t* voisins = (noeud_id_t* ) malloc(nb_voisins);
         noeuds_voisins(graphe, nc, voisins);
         for (size_t i =0; i < nb_voisins; i++ ) {
             noeud_id_t nv = voisins[i];
-            double d_actu = distance_noeud_liste(Visites, nc) + noeud_distance(graphe, nc, nv);
+            if (!contient_noeud_liste(visites, nv)) {
+                double d_actu = distance_noeud_liste(visites, nc) + noeud_distance(graphe, nc, nv);
 
-            if (distance_noeud_liste(aVisiter, nv) > d_actu) {
-                changer_noeud_liste(aVisiter, nv, nc, d_actu);
+                if (distance_noeud_liste(aVisiter, nv) > d_actu) {
+                    changer_noeud_liste(aVisiter, nv, nc, d_actu);
+                }
             }
         }
+
+        free(voisins);
     }
 
-    return 3.0f;
+    if (chemin != NULL) {
+
+        *chemin = creer_liste();
+        inserer_noeud_liste(*chemin, destination, precedent_noeud_liste(visites, destination),
+                            distance_noeud_liste(visites, destination));
+
+        construire_chemin_vers(chemin, visites, destination);
+
+    }
+
+    float res = (float)  distance_noeud_liste(visites, destination);
+
+    detruire_liste(&aVisiter);
+    detruire_liste(&visites);
+
+    return res;
 }
 
 
