@@ -35,7 +35,7 @@ int main() {
     SET_ANALYSIS("test_liste_noeud.csv");
 
     BEGIN_SECTION("liste_noeud-creation/destruction")
-        BEGIN_TESTI("creation/destruction");
+        BEGIN_TESTI("creation/destruction")
             liste_noeud_t* t = creer_liste();
             detruire_liste(&t);
             ASSERT(t == NULL);
